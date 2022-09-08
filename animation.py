@@ -1,5 +1,5 @@
 import manim as mn
-from manim import Write, ApplyMethod
+from manim import *
 from typing import Callable, Dict
 import util
 from functools import partial
@@ -10,8 +10,8 @@ def new_matrix(self, matrix: list[list], modifier: Callable[[mn.Matrix], None] =
     matrixObj = mn.Matrix(matrix)
     if modifier:
         modifier(matrixObj)
-    self.add(matrixObj)
-    self.play(mn.Create(matrixObj))
+    mn.Create(matrixObj)
+    util.zoom_object(self, matrixObj)
     self.wait(2)
 
 
@@ -60,68 +60,56 @@ class BlockMatrix(mn.Scene):
 class AntisymmetricMatrix(mn.Scene):
     def construct(self):
         FONT = util.Font(type="monospace", size=48)
-        PLAY_KW = {"run_time": 0.5}
+        PLAY_KW = {"run_time": 1.5}
 
         # Антисимметричная матрица
-        matrix = np.array([
+        matrix = Matrix([
             [0, 2, -45],
             [-2, 0, -4],
             [45, 4, 4],
         ])
-        
-        antisymmetric = np.zeros(matrix.shape, dtype="int64")
-        for iy, ix in np.ndindex(matrix.shape):
-            antisymmetric[ix][iy] = int(matrix[iy][ix])
-            
-        # text:
-        header = mn.VGroup()  # create a VGroup
-        box = mn.Rectangle(  # create a box
-            height=1.1, width=3, fill_color=mn.RED,
-            fill_opacity=0, stroke_color=mn.RED
-        )
-        formula = mn.MathTex(r"a_{ji} = - a_{ij}", font_size=FONT.size).move_to(box.get_center())
-        header.add(box, formula)  # add both objects to the VGroup
 
-        self.play(Write(header))
+        antisymmetric = Matrix([
+            [0, -2, 45],
+            [2, 0, 4],
+            [-45, -4, 4],
+        ])
+
+        colors1 = [
+            WHITE, GREEN, YELLOW, 
+            WHITE, WHITE, RED, 
+            WHITE, WHITE, WHITE
+            ]
+
+        colors2 = [
+            WHITE, WHITE, WHITE, 
+            GREEN, WHITE, WHITE, 
+            YELLOW, RED, WHITE
+            ]
+        
+        for i, (entry1, entry2) in enumerate(zip(matrix.get_entries(), antisymmetric.get_entries())):
+            entry1.set_color(colors1[i])
+            entry2.set_color(colors2[i])
+        
+        # text:
+        header = util.create_header()
+
+        util.zoom_object(self, header)
+
+        # self.play(Write(header))
         self.play(ApplyMethod(header.shift, mn.UP*3))
 
         # first matrix objects
-        m_label = mn.MathTex("A", font_size=FONT.size)
-        m_label.shift(mn.LEFT)
-        equal_sign = mn.Text("=", font_size=FONT.size, font=FONT.type)
-        origin_matrix = mn.Matrix(matrix.tolist())
-        orig_m_group = mn.VGroup(m_label, equal_sign, origin_matrix)
-        
-        # first matrix operations
-        equal_sign.next_to(m_label)
-        origin_matrix.next_to(equal_sign)
+        equation1 = util.create_equation("A", [matrix])
 
         # animate
-        self.play(Write(m_label), Write(equal_sign))
-        self.play(Write(origin_matrix))
-        self.play(ApplyMethod(orig_m_group.shift, mn.LEFT*5.5))
-        self.play(ApplyMethod(orig_m_group.shift, mn.UP*1))
+        equation1.shift(mn.LEFT*2)
+        self.play(Write(equation1), **PLAY_KW)
+        self.wait(3)
+        self.play(ApplyMethod(equation1.shift, mn.LEFT*4.5))
 
         # antisymmetric matrix objects
-        antisym_matrix = mn.Matrix(antisymmetric)
-        neg_m_label = mn.MathTex("-A", font_size=FONT.size)
-        neg_m_label.shift(mn.LEFT)
-        equal_sign2 = equal_sign.copy()
-        equal_sign3 = equal_sign.copy()
-        transpose_label = mn.MathTex("A^T", font_size=FONT.size)
-        neg_m_group = mn.VGroup(neg_m_label, equal_sign2, antisym_matrix)
+        equation2 = util.create_equation("-A", [antisymmetric, mn.MathTex("A^T")])
 
-        # antisymmetric matrix operations
-        equal_sign2.next_to(neg_m_label)
-        antisym_matrix.next_to(equal_sign2)
-
-        self.play(Write(neg_m_label), Write(equal_sign2))
-        self.play(Write(antisym_matrix))
-        self.play(ApplyMethod(neg_m_group.shift, mn.DOWN*2))
-        self.play(ApplyMethod(neg_m_group.shift, mn.LEFT*5.5))
-
-        equal_sign3.next_to(antisym_matrix)
-        transpose_label.next_to(equal_sign3)
-
-        self.play(Write(equal_sign3))
-        self.play(Write(transpose_label))
+        equation2.shift(mn.LEFT*.5)
+        self.play(Write(equation2), **PLAY_KW)
