@@ -69,9 +69,21 @@ class AntisymmetricMatrix(mn.Scene):
             [45, 4, 4],
         ])
         
-        antisymmetric = np.zeros(matrix.shape)
+        antisymmetric = np.zeros(matrix.shape, dtype="int64")
         for iy, ix in np.ndindex(matrix.shape):
-            antisymmetric[iy][ix] = -matrix[ix][iy] 
+            antisymmetric[ix][iy] = int(matrix[iy][ix])
+            
+        # text:
+        header = mn.VGroup()  # create a VGroup
+        box = mn.Rectangle(  # create a box
+            height=1.1, width=3, fill_color=mn.RED,
+            fill_opacity=0, stroke_color=mn.RED
+        )
+        formula = mn.MathTex(r"a_{ji} = - a_{ij}", font_size=FONT.size).move_to(box.get_center())
+        header.add(box, formula)  # add both objects to the VGroup
+
+        self.play(Write(header))
+        self.play(ApplyMethod(header.shift, mn.UP*3))
 
         # first matrix objects
         m_label = mn.MathTex("A", font_size=FONT.size)
@@ -87,8 +99,8 @@ class AntisymmetricMatrix(mn.Scene):
         # animate
         self.play(Write(m_label), Write(equal_sign))
         self.play(Write(origin_matrix))
-        self.play(ApplyMethod(orig_m_group.shift, mn.LEFT*5))
-        self.play(ApplyMethod(orig_m_group.shift, mn.UP*2))
+        self.play(ApplyMethod(orig_m_group.shift, mn.LEFT*5.5))
+        self.play(ApplyMethod(orig_m_group.shift, mn.UP*1))
 
         # antisymmetric matrix objects
         antisym_matrix = mn.Matrix(antisymmetric)
@@ -106,7 +118,7 @@ class AntisymmetricMatrix(mn.Scene):
         self.play(Write(neg_m_label), Write(equal_sign2))
         self.play(Write(antisym_matrix))
         self.play(ApplyMethod(neg_m_group.shift, mn.DOWN*2))
-        self.play(ApplyMethod(neg_m_group.shift, mn.LEFT*5))
+        self.play(ApplyMethod(neg_m_group.shift, mn.LEFT*5.5))
 
         equal_sign3.next_to(antisym_matrix)
         transpose_label.next_to(equal_sign3)
