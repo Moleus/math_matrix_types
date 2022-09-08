@@ -1,5 +1,12 @@
 from typing import Callable, Dict
 import manim as mn
+from dataclasses import dataclass
+
+
+@dataclass
+class Font:
+  type: str
+  size: int
 
 
 def get_index2color(elements_count: int, color: mn.utils.color.Colors, condition: Callable[[int], bool]) -> Dict[int, mn.utils.color.Colors]:
